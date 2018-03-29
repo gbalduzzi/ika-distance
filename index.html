@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<title>IkaDistance Calculator</title>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div class="container">
+		<div id="title">
+			<h2>Ikariam distance calculator</h2>
+			<span>The best way to find where your enemy is heading</span> <br>
+			<span>Note that this site doesn't work for movement on the same island</span>
+		</div>
+		<div class="row">
+			<div class="col-12 col-md-6 offset-md-3" >
+				<div class="card">
+				 	<div class="card-header">
+				    	Calculate velocity
+				 	</div>
+				  	<div class="card-body">
+				  		<div class="row">
+						    <div class="form-group col-5">
+								<label for="ship">Ship speed</label>
+								<select id="ship" class="form-control" name="ship">
+									<option value="60">60 - Cargo ship</option>
+									<option value="40">40 - Default war ship</option>
+									<option value="30">30 - Mortar ship, Rocket ship, Tender</option>
+									<option value="20">20 - Balloon carrier </option>
+								</select>
+							</div>
+							<div class="form-group col-4">
+								<label for="pose">Poseidon</label>
+								<select id="pose" class="form-control" name="pose">
+									<option value="0">Not active</option>
+									<option value="10">Level 1 </option>
+									<option value="30">Level 2</option>
+									<option value="50">Level 3</option>
+									<option value="70">Level 4</option>
+									<option value="100">Level 5</option>
+								</select>
+							</div>
+							<div class="form-group col-3">
+								<label for="bonus">Other bonus</label>
+								<div class="input-group">
+									<input id="bonus" class="form-control" name="bonus" type="number" min="0" max="400" value="0" />
+									<div class="input-group-append">
+									    <span class="input-group-text">%</span>
+									</div>
+								</div>
+							</div>
+						</div>
+				  	</div>
+				</div>
+			</div>
+		</div>
+		<br>
+		<div class="row">
+			<div class="col-12 col-md-6 offset-md-3">
+				<div class="card">
+				 	<div class="card-header">
+				    	Movement info
+				 	</div>
+				  	<div class="card-body">
+				  		<div class="row">
+						    <div class="form-group col-4">
+								<label for="x">start X</label>
+								<input id="x" class="form-control" name="x" type="number" min="0" max="100" value="50" />
+							</div>
+							<div class="form-group col-4">
+								<label for="y">start Y</label>
+								<input id="y" class="form-control" name="y" type="number" min="0" max="100" value="50" />
+							</div>
+							<div class="form-group col-4">
+								<label for="v">Velocity</label>
+								<input id="v" class="form-control" name="v" type="number" min="0" max="400" value="60" />
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-4">
+								<label for="h">Hours</label>
+								<input id="h" name="h" class="form-control" type="number" min="0" max="24" value="0"/>
+							</div>
+							<div class="form-group col-4">
+								<label for="m">Minutes</label>
+								<input id="m" name="m" class="form-control" type="number" min="0" max="60" value="0"/> 
+							</div>
+							<div class="form-group col-4">
+								<label for="s">Seconds</label>
+								<input id="s" name="s" class="form-control" type="number" min="0" max="60" value="0"/>
+							</div>
+						</div>
+						<button type="submit" id="calculate" name="calc" class="btn btn-primary" onclick="calculatePossibilities()">Calculate</button>
+				  	</div>
+				</div>
+			</div>
+		</div>
+		<br>
+
+		<div class="row">
+			<div class="col-12 col-md-6 offset-md-3">
+				<ul class="list-group " id="output"></ul>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+
+		function formatDistance(d, v) {
+			t = (d*1200) / v
+			tInt = Math.floor(t);
+
+			var seconds = t != tInt ? Math.round((t - tInt)*60) : 0;
+			var hours = Math.floor(tInt / 60);
+			tInt = tInt % 60;
+
+			return hours+"h "+tInt+"m "+seconds+"s";
+
+		}
+
+		var ship = document.getElementById("ship");
+		var pose = document.getElementById("pose");
+		var bonus = document.getElementById("bonus");
+		ship.addEventListener("change", calculateVelocity);
+		pose.addEventListener("change", calculateVelocity);
+		bonus.addEventListener("change", calculateVelocity);
+
+		function calculateVelocity() {
+			var shipV = parseInt(ship.value);
+			var poseV = parseInt(pose.value);
+			var bonusV = parseInt(bonus.value);
+
+			var totalVelocity = Math.round(shipV*(1+(poseV + bonusV)/100));
+
+			document.getElementById('v').value = totalVelocity;
+
+		}
+
+		function calculatePossibilities() {
+			var output = document.getElementById('output');
+			output.innerHTML = "";
+
+			var startX = parseInt(document.getElementById('x').value);
+			var startY = parseInt(document.getElementById('y').value);
+			var v = parseInt(document.getElementById('v').value);
+
+			var h = parseInt(document.getElementById('h').value);
+			var m = parseInt(document.getElementById('m').value);
+			var s = parseInt(document.getElementById('s').value);
+
+			totalMinutes = m + h*60 + s/60;
+
+			distance = (totalMinutes * v) / 1200;
+
+			xLowerBound = Math.max(0, startX - Math.ceil(distance));
+			yLowerBound = Math.max(0, startY - Math.ceil(distance));
+			xUpperBound = Math.min(100, startX + Math.ceil(distance));
+			yUpperBound = Math.min(100, startY + Math.ceil(distance));
+
+			var found = 0;
+
+			for(x = xLowerBound; x <= xUpperBound; x++) {
+				for(y = yLowerBound; y <= yUpperBound; y++) {
+					d = Math.sqrt(Math.abs(x - startX)**2 + Math.abs(y - startY)**2);
+
+					if (Math.abs(d - distance) < 0.005) {
+						output.innerHTML += '<li class="list-group-item"><b>'+x + ":" + y + "</b> - distance " + formatDistance(d, v) + "</li>"
+						found++
+					}
+				}
+			}
+
+			if (found == 0) {
+				output.innerHTML += '<li class="list-group-item">No islands detected</li>'
+			}
+		}
+	</script>
+
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+</body>	
+</html>
